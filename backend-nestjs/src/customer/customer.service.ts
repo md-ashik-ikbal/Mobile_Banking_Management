@@ -1,11 +1,10 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateCustomerDto } from './dto/create-customer.dto';
+import { CreateCustomerDto, SignupDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import * as bcrypt from 'bcrypt'
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/auth/entities/auth.entity';
+import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { SignupDto } from 'src/auth/dto/create-auth.dto';
 
 @Injectable()
 export class CustomerService {
