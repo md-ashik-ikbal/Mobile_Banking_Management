@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { SignupDto } from 'src/auth/dto/create-auth.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('customer')
 export class CustomerController {
@@ -13,8 +14,9 @@ export class CustomerController {
     return await this.customerService.Signup(signupDto);
   }
 
-  @Get(":id")
-  async Profile(@Param("id") id: number) {
-    return await this.customerService.Profile(+id);
+  @UseGuards(AuthGuard)
+  @Get("/profile")
+  async Profile(@Request() req) {
+    return await this.customerService.Profile(req.user.user_id);
   }
 }
