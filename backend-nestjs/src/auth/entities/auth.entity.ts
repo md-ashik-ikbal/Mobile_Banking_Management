@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity("user_entity")
 export class UserEntity {
@@ -9,9 +9,11 @@ export class UserEntity {
     user_name: string;
 
     @Column()
+    // @Unique(["user_phone"])
     user_phone: string;
     
     @Column()
+    // @Unique(["user_email"])
     user_email: string;
 
     @Column()

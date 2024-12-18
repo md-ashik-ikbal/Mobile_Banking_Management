@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import * as bcrypt from 'bcrypt'
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from 'src/auth/entities/auth.entity';
+import { Repository } from 'typeorm';
+import { SignupDto } from 'src/auth/dto/create-auth.dto';
 
 @Injectable()
 export class CustomerService {
-  create(createCustomerDto: CreateCustomerDto) {
-    return 'This action adds a new customer';
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly user_repo: Repository<UserEntity>
+  ) {}
+
+  async Signup(signupDto: SignupDto): Promise<{ message: string }> {
+    try {
+      // Check if the user already exists
+      const existing_user = await this.user_repo.findOneBy({ user_phone: signupDto.user_phone });
+
+      if (existing_user) {
+        throw new HttpException('User already exists', HttpStatus.CONFLICT);
+      }
+      
+      var new_user: UserEntity = new UserEntity();
+      new_user = signupDto;
+      new_user.user_password = await bcrypt.hash(signupDto.user_password, 10);
+      await this.user_repo.save(new_user);
+      return {
+        message: 'User signed up successfully',
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error; // Re-throw known HTTP errors
+      }
+
+      console.error('Error during signup:', error);
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  findAll() {
-    return `This action returns all customer`;
-  }
+  async Profile(id: number) {
+    try {
+      // Try to find the customer by user_id
+      const get_customer = await this.user_repo.findOneBy({ user_id: id });
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
-  }
+      // If no customer found, throw a NotFoundException
+      if (!get_customer) {
+        throw new NotFoundException('User not found');
+      }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
-  }
+      // Return the found customer
+      return get_customer;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        // Don't catch NotFoundException as it's handled already
+        throw error;
+      }
 
-  remove(id: number) {
-    return `This action removes a #${id} customer`;
+      throw new InternalServerErrorException('An error occurred while fetching the user profile');
+    }
   }
 }

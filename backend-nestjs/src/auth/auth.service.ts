@@ -5,41 +5,27 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/auth.entity';
 import * as bcrypt from 'bcrypt'
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly user_repo: Repository<UserEntity>
+    private readonly user_repo: Repository<UserEntity>,
+
+    private readonly jwtService: JwtService
   ) { };
 
-  async Signup(signupDto: SignupDto): Promise<{ message: string }> {
-    try {
-      // Check if the user already exists
-      const existing_user = await this.user_repo.findOneBy({ user_phone: signupDto.user_phone });
-
-      if (existing_user) {
-        throw new HttpException('User already exists', HttpStatus.CONFLICT);
+  async get_token(id: number, phone: string) {
+    return await this.jwtService.signAsync(
+      {
+        sub: id,
+        phone
+      },
+      {
+        secret: process.env.JWT_SECRET,
       }
-      
-      var new_user: UserEntity = new UserEntity();
-      new_user = signupDto;
-      new_user.user_password = await bcrypt.hash(signupDto.user_password, 10);
-      await this.user_repo.save(new_user);
-      return {
-        message: 'User signed up successfully',
-      }
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error; // Re-throw known HTTP errors
-      }
-
-      console.error('Error during signup:', error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    );
   }
 
   async Login(loginDto: LoginDto) {
@@ -58,7 +44,7 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      return { message: "Login success" };
+      return { access_token: await this.get_token(user.user_id, user.user_phone) };
 
     } catch (error) {
       if (error instanceof HttpException) {
