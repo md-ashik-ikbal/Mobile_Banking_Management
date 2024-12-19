@@ -6,6 +6,7 @@ import { UserEntity } from 'src/customer/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './auth.guard';
 import { SessionEntity } from './entities/auth.entity';
+import { TokenBlacklistService } from './token-blacklist/token-blacklist.service';
 
 @Module({
   imports: [
@@ -22,6 +23,6 @@ import { SessionEntity } from './entities/auth.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard],
+  providers: [AuthService, AuthGuard, TokenBlacklistService],
 })
 export class AuthModule {}

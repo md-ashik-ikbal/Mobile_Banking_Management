@@ -8,6 +8,8 @@ import { AccountEntity } from './entities/account.entity';
 import { TransactionEntity } from './entities/transaction.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
+import { TokenBlacklistService } from 'src/auth/token-blacklist/token-blacklist.service';
+import { SessionEntity } from 'src/auth/entities/auth.entity';
 
 @Module({
   imports: [
@@ -15,11 +17,12 @@ import { JwtModule } from '@nestjs/jwt';
       UserEntity,
       CustomerEntity,
       AccountEntity,
-      TransactionEntity
+      TransactionEntity,
+      SessionEntity
     ]),
     JwtModule
   ],
   controllers: [CustomerController],
-  providers: [CustomerService],
+  providers: [CustomerService, TokenBlacklistService],
 })
 export class CustomerModule {}

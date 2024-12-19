@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt';
 import { CreateAuthDto, LoginDto } from './dto/create-auth.dto';
 import { SessionEntity } from './entities/auth.entity';
+import { TokenBlacklistService } from './token-blacklist/token-blacklist.service';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +19,8 @@ export class AuthService {
     @InjectRepository(SessionEntity)
     private readonly session_repo: Repository<SessionEntity>,
 
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly tokenBlacklistService: TokenBlacklistService
   ) { };
 
   async generate_token(id: number, phone: string) {
@@ -85,5 +88,13 @@ export class AuthService {
 
       throw new HttpException('Login failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  extract_token_from_header(request: Request): string | undefined {
+    return request.headers.authorization?.split(' ')[1];
+  }
+
+  async Logout(phone: string, token: string) {
+    return await this.tokenBlacklistService.add_token_blacklist(phone, token);
   }
 }
