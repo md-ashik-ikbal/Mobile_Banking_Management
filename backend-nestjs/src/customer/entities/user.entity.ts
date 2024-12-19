@@ -1,9 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToOne, JoinColumn } from "typeorm";
+import { CustomerEntity } from "./customer.entity";
 
 @Entity("user_entity")
 export class UserEntity {
     @PrimaryGeneratedColumn()
     user_id: number;
+
+    @OneToOne(() => CustomerEntity)
+    customer: CustomerEntity;
 
     @Column()
     user_name: string;

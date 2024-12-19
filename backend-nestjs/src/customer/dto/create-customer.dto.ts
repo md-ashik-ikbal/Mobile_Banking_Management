@@ -1,3 +1,5 @@
+import { CustomerEntity } from "../entities/customer.entity";
+
 export class CreateCustomerDto {}
 
 export class SignupDto {
@@ -7,4 +9,5 @@ export class SignupDto {
     user_email: string;
     user_role: string;
     user_password: string;
+    customer: CustomerEntity;
 }

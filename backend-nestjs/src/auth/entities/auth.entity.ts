@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { UserEntity } from "src/customer/entities/user.entity";
 
 @Entity("session_entity")
@@ -8,8 +8,8 @@ export class SessionEntity {
 
     @Column()
     user_id: number;
-    
-    @OneToOne(() => UserEntity)
+
+    @ManyToOne(() => UserEntity)
     @JoinColumn({ name: "user_id" })
     user: UserEntity;
 
@@ -17,8 +17,8 @@ export class SessionEntity {
     jwt_token: string;
 
     @Column()
-    creation_date: string;
+    creation_date: Date;
 
     @Column()
-    expiration_date: string;
+    expiration_date: Date;
 }

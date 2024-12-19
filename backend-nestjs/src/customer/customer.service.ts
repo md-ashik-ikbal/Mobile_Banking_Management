@@ -45,15 +45,17 @@ export class CustomerService {
   async Profile(id: number) {
     try {
       // Try to find the customer by user_id
-      const get_customer = await this.user_repo.findOneBy({ user_id: id });
+      const get_user = await this.user_repo.findOneBy({ user_id: id });
 
       // If no customer found, throw a NotFoundException
-      if (!get_customer) {
+      if (!get_user) {
         throw new NotFoundException('User not found');
       }
 
-      // Return the found customer
-      return get_customer;
+      const { user_password, ...userWithoutPassword } = get_user;
+
+      // Return the user without the password field
+      return userWithoutPassword;
     } catch (error) {
       if (error instanceof NotFoundException) {
         // Don't catch NotFoundException as it's handled already
