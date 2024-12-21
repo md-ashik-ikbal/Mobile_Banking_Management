@@ -9,7 +9,7 @@ export class CustomerEntity {
     user_id: number;
 
     @Column()
-    @Unique(["user_nid"])
+    @Unique(["customer_nid"])
     customer_nid: string;
 
     @Column()

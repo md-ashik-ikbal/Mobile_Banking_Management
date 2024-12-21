@@ -98,34 +98,58 @@ export class CustomerService {
     new_account.account_creation_time = new Date();
     new_account.transactions = [];
 
+    console.log(account, customer);
+
     await this.account_repo.save(account);
     await this.customer_repo.save(customer);
 
     return { message: "Customer created" }
   }
 
-  async Profile(id: number) {
-    try {
-      // Try to find the customer by user_id
-      const get_user = await this.user_repo.findOneBy({ user_id: id });
+  async user_data(id: number = -1, phone: string = "-1") {
+    const in_user_repo = await this.user_repo.findOne({
+      where:[
+        { user_id: id },
+        { user_phone: phone }
+      ]
+    });
 
-      // If no customer found, throw a NotFoundException
-      if (!get_user) {
-        throw new NotFoundException('User not found');
-      }
+    const in_customer_repo = await this.customer_repo.findOne({
+      where: [
+        { user_id: id }
+      ],
+      relations: ["account"]
+    });
 
-      const { user_password, ...userWithoutPassword } = get_user;
-
-      // Return the user without the password field
-      return userWithoutPassword;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        // Don't catch NotFoundException as it's handled already
-        throw error;
-      }
-
-      throw new InternalServerErrorException('An error occurred while fetching the user profile');
+    return {
+      in_user_repo,
+      in_customer_repo
     }
+  }
+
+  async Profile(id: number) {
+    return await this.user_data(id);
+    // try {
+    //   // Try to find the customer by user_id
+    //   const get_user = await this.user_repo.findOneBy({ user_id: id });
+
+    //   // If no customer found, throw a NotFoundException
+    //   if (!get_user) {
+    //     throw new NotFoundException('User not found');
+    //   }
+
+    //   const { user_password, ...userWithoutPassword } = get_user;
+
+    //   // Return the user without the password field
+    //   return userWithoutPassword;
+    // } catch (error) {
+    //   if (error instanceof NotFoundException) {
+    //     // Don't catch NotFoundException as it's handled already
+    //     throw error;
+    //   }
+
+    //   throw new InternalServerErrorException('An error occurred while fetching the user profile');
+    // }
   }
 
   async Send_Money(sender_id: number, sendMoneyDto: SendMoneyDto) {
@@ -183,5 +207,16 @@ export class CustomerService {
 
       throw new HttpException("Send money success", HttpStatus.OK);
     }
+  }
+
+  async charge_calculate(amount: number) {
+  }
+
+  async Payment(id: number) {
+
+  }
+
+  async Cash_Out(id: number) {
+
   }
 }

@@ -20,17 +20,19 @@ export class CustomerController {
   @UseGuards(AuthGuard)
   async Create_Customer(@Request() request, @Body() createPersonalAccountDto: CreatePersonalAccountDto) {
     return await this.customerService.Create_Personal_Account(request.user.sub, createPersonalAccountDto);
+    
   }
 
   @Get("/profile")
   @UseGuards(AuthGuard)
   async Profile(@Request() request) {
-    return await this.customerService.Profile(request.sub);
+    console.log(request.sub)
+    return await this.customerService.Profile(request.user.sub);
   }
 
   @Post("/send_money")
   @UseGuards(AuthGuard)
   async Send_Money(@Request() request, @Body() sendMoneyDto: SendMoneyDto) {
-    return await this.customerService.Send_Money(request.sub, sendMoneyDto);
+    return await this.customerService.Send_Money(request.user.sub, sendMoneyDto);
   }
 }

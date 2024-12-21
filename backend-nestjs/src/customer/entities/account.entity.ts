@@ -7,6 +7,9 @@ export class AccountEntity {
     @PrimaryColumn()
     user_id: number;
 
+    @OneToOne(() => CustomerEntity)
+    customer: CustomerEntity;
+
     @Column()
     account_balance: number;
 
