@@ -1,19 +1,21 @@
-import { Entity, PrimaryColumn, OneToOne, JoinColumn, Column } from "typeorm";
+import { Entity, PrimaryColumn, OneToOne, JoinColumn, Column, OneToMany } from "typeorm";
 import { CustomerEntity } from "./customer.entity";
+import { TransactionEntity } from "./transaction.entity";
 
 @Entity("account_entity")
 export class AccountEntity {
     @PrimaryColumn()
     user_id: number;
 
-    @OneToOne(() => CustomerEntity)
-    @JoinColumn({ name: "user_id" })
-    user: CustomerEntity;
-
     @Column()
     account_balance: number;
 
-    // Add a OneToOne relation with CustomerEntity
-    @OneToOne(() => CustomerEntity, customer => customer.account)
-    customer: CustomerEntity; // relation to CustomerEntity
+    @Column()
+    account_type: string;
+
+    @Column()
+    account_creation_time: Date;
+
+    @OneToMany(() => TransactionEntity, (transaction) => transaction.transaction_id)
+    transactions: TransactionEntity[];
 }

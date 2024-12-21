@@ -6,9 +6,6 @@ export class UserEntity {
     @PrimaryGeneratedColumn()
     user_id: number;
 
-    @OneToOne(() => CustomerEntity)
-    customer: CustomerEntity;
-
     @Column()
     user_name: string;
 
@@ -25,4 +22,7 @@ export class UserEntity {
 
     @Column()
     user_password: string;
+
+    @OneToOne(() => CustomerEntity)
+    customer: CustomerEntity;
 }

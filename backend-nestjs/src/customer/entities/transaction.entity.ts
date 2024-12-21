@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { CustomerEntity } from "./customer.entity";
+import { AccountEntity } from "./account.entity";
 
 @Entity("transaction_entity")
 export class TransactionEntity {
@@ -16,8 +16,11 @@ export class TransactionEntity {
     transaction_type: string;
 
     @Column()
-    transaction_amount: string;
+    transaction_amount: number;
 
-    @ManyToOne(() => CustomerEntity, (customer) => customer.user_id)
-    customer: CustomerEntity;
+    @Column()
+    trnsaction_time: Date;
+
+    @ManyToOne(() => AccountEntity, (account) => account.user_id)
+    account: AccountEntity;
 }

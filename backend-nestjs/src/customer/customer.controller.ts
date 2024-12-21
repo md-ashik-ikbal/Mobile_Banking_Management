@@ -1,8 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Req } from '@nestjs/common';
 import { CustomerService } from './customer.service';
-import { CreateCustomerDto, SignupDto } from './dto/create-customer.dto';
+import { CreatePersonalAccountDto, SignupDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { SendMoneyDto } from './dto/send-money.dto';
 
 @Controller('customer')
 export class CustomerController {
@@ -15,9 +16,21 @@ export class CustomerController {
     return await this.customerService.Signup(signupDto);
   }
 
+  @Post("/create_personal_account")
+  @UseGuards(AuthGuard)
+  async Create_Customer(@Request() request, @Body() createPersonalAccountDto: CreatePersonalAccountDto) {
+    return await this.customerService.Create_Personal_Account(request.user.sub, createPersonalAccountDto);
+  }
+
   @Get("/profile")
   @UseGuards(AuthGuard)
-  async Profile(@Request() req) {
-    return await this.customerService.Profile(req.user.user_id);
+  async Profile(@Request() request) {
+    return await this.customerService.Profile(request.sub);
+  }
+
+  @Post("/send_money")
+  @UseGuards(AuthGuard)
+  async Send_Money(@Request() request, @Body() sendMoneyDto: SendMoneyDto) {
+    return await this.customerService.Send_Money(request.sub, sendMoneyDto);
   }
 }
