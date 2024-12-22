@@ -12,6 +12,8 @@ import { TokenBlacklistService } from 'src/auth/token-blacklist/token-blacklist.
 import { SessionEntity } from 'src/auth/entities/auth.entity';
 import { PaymentEntity } from './entities/payment.entity';
 import { MerchantEntity } from './entities/merchant.entity';
+import { MailService } from './mail/mail.service';
+import { OtpEntity } from './entities/otp.entity';
 
 @Module({
   imports: [
@@ -22,11 +24,12 @@ import { MerchantEntity } from './entities/merchant.entity';
       TransactionEntity,
       SessionEntity,
       PaymentEntity,
-      MerchantEntity
+      MerchantEntity,
+      OtpEntity
     ]),
     JwtModule
   ],
   controllers: [CustomerController],
-  providers: [CustomerService, TokenBlacklistService],
+  providers: [CustomerService, TokenBlacklistService, MailService],
 })
 export class CustomerModule {}

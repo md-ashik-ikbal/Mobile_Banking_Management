@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreatePersonalAccountDto, SignupDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import * as bcrypt from 'bcrypt'
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { And, Repository } from 'typeorm';
+import { And, MoreThan, Repository } from 'typeorm';
 import { CreateAccontDto } from './dto/create-account.dto';
 import { AccountEntity } from './entities/account.entity';
 import { CustomerEntity } from './entities/customer.entity';
@@ -15,6 +15,10 @@ import { TransactionType } from './constraints/transaction-type.contraint';
 import { MakePaymentDto } from './dto/make-payment.dto';
 import { PaymentEntity } from './entities/payment.entity';
 import { MerchantEntity } from './entities/merchant.entity';
+import { randomInt } from 'crypto';
+import { MailService } from './mail/mail.service';
+import { OtpEntity } from './entities/otp.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class CustomerService {
@@ -35,7 +39,12 @@ export class CustomerService {
     private readonly payment_repo: Repository<PaymentEntity>,
 
     @InjectRepository(MerchantEntity)
-    private readonly merchant_repo: Repository<MerchantEntity>
+    private readonly merchant_repo: Repository<MerchantEntity>,
+
+    @InjectRepository(OtpEntity)
+    private readonly otp_repo: Repository<OtpEntity>,
+
+    private readonly mailService: MailService
   ) {}
 
   async Signup(signupDto: SignupDto): Promise<{ message: string }> {
@@ -115,11 +124,12 @@ export class CustomerService {
     return { message: "Customer created" }
   }
 
-  async user_data(id: number = -1, phone: string = "-1") {
+  async user_data(id: number = -1, phone: string = "-1", email: string = "") {
     const in_user_repo = await this.user_repo.findOne({
       where:[
-        { user_id: id },
-        { user_phone: phone }
+        { user_id: id !== -1 ? id : undefined },
+        { user_phone: phone !== "-1" ? phone : undefined },
+        { user_email: email !== "" ? email : undefined }
       ]
     });
 
@@ -207,7 +217,7 @@ export class CustomerService {
       new_transaction.sender_phone = (await this.user_repo.findOneBy({ user_id: sender_data.user_id })).user_phone;
       new_transaction.receiver_phone = receiver_data.user_phone;
       new_transaction.transaction_amount = sendMoneyDto.transaction_amount;
-      new_transaction.transaction_type = TransactionType.Payment;
+      new_transaction.transaction_type = TransactionType.Send_Money;
       new_transaction.transaction_amount = sendMoneyDto.transaction_amount;
       new_transaction.trnsaction_time = new Date();
       new_transaction.account = sender_data.account;
@@ -251,13 +261,21 @@ export class CustomerService {
 
     new_transaction.sender_phone = user_data.in_user_repo.user_phone;
     new_transaction.receiver_phone = merchant_data.in_user_repo.user_phone;
-    new_transaction.transaction_type = TransactionType.Send_Money;
+    new_transaction.transaction_type = TransactionType.Payment;
     new_transaction.transaction_amount = payment_data.payment_amount;
     new_transaction.trnsaction_time = new Date();
     new_transaction.account = user_data.in_customer_repo.account;
     await this.trnsaction_repo.save(new_transaction);
 
-    throw new HttpException("Payment success", HttpStatus.OK)
+    // throw new HttpException("Payment success", HttpStatus.OK);
+    return {
+      message: "Payment success",
+      payment_token: payment_data.payment_token,
+      payment_for: payment_data.payment_for,
+      payment_to: merchant_data.in_user_repo.user_name,
+      payment_amount: payment_data.payment_amount,
+      payment_status: "paid"
+    }
   }
 
   async charge_calculate(amount: number) {
@@ -268,6 +286,61 @@ export class CustomerService {
 
     if (!user_data.in_user_repo) {
       throw new NotFoundException("User not found");
+    }
+  }
+
+  async send_otp(phone: string) {
+    const user = await this.user_data(-1, phone);
+    
+    if(!user.in_user_repo) {
+      throw new NotFoundException("User not found");
+    }
+
+    const opt = randomInt(100000, 1000000).toString();
+
+    const new_otp: OtpEntity = new OtpEntity();
+    new_otp.user_email = user.in_user_repo.user_email;
+    new_otp.otp = opt;
+    new_otp.generation_time = new Date()
+    new_otp.expiration_time = new Date(new Date().getTime() + 10 * 60 * 1000);
+    await this.otp_repo.save(new_otp);
+    await this.mailService.Send_OTP(user.in_user_repo.user_email, opt);
+
+    return { email: user.in_user_repo.user_email, Otp: new_otp.otp };
+  }
+
+  async Change_Password(changePasswordDto: ChangePasswordDto) {
+    const otp_data = await this.otp_repo.findOne({
+      where: {
+          otp: changePasswordDto.otp,
+          user_email: changePasswordDto.user_email,
+          expiration_time: MoreThan(new Date())
+        },
+        order: {
+          expiration_time: "DESC" // Order by expiration_time in descending order to get the most recent one
+        }
+    });
+
+    if (!otp_data) {
+      throw new NotFoundException("Otp not found or expired");
+    }
+
+    if (changePasswordDto.new_password !== changePasswordDto.confirm_password) {
+      throw new BadRequestException("New password and confirm password did not match");
+    }
+
+    const user = await this.user_data(-1, "", changePasswordDto.user_email);
+    user.in_user_repo.user_password = await bcrypt.hash(changePasswordDto.new_password, 10);
+
+    otp_data.expiration_time = new Date();
+
+    await this.user_repo.save(user.in_user_repo);
+
+    await this.otp_repo.save(otp_data);
+
+    return {
+      message: 'Password changed successfully',
+      user_email: user.in_user_repo.user_email
     }
   }
 }

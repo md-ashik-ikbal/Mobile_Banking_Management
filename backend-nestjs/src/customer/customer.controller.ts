@@ -6,11 +6,14 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { SendMoneyDto } from './dto/send-money.dto';
 import { MakePaymentDto } from './dto/make-payment.dto';
 import { CahsOutDto } from './dto/cash-out.dto';
+import { MailService } from './mail/mail.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('customer')
 export class CustomerController {
   constructor(
-    private readonly customerService: CustomerService
+    private readonly customerService: CustomerService,
+    private readonly mailService: MailService
   ) {}
 
   @Post("/signup")
@@ -48,5 +51,15 @@ export class CustomerController {
   @UseGuards(AuthGuard)
   async Cash_Out(@Request() request, @Body() cahsOutDto: CahsOutDto) {
     return await this.customerService.Cash_Out(request.user.sub);
+  }
+
+  @Post("/forgot_password")
+  async Send_Email(@Body() phone: { user_phone: string }) {
+    return await this.customerService.send_otp(phone.user_phone);
+  }
+
+  @Post("/change_password")
+  async Change_Password(@Body() changePasswordDto: ChangePasswordDto) {
+    return await this.customerService.Change_Password(changePasswordDto);
   }
 }
