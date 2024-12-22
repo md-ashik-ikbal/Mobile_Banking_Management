@@ -50,7 +50,7 @@ export class CustomerController {
   @Post("/cash_out")
   @UseGuards(AuthGuard)
   async Cash_Out(@Request() request, @Body() cahsOutDto: CahsOutDto) {
-    return await this.customerService.Cash_Out(request.user.sub);
+    return await this.customerService.Cash_Out(request.user.sub, cahsOutDto);
   }
 
   @Post("/forgot_password")

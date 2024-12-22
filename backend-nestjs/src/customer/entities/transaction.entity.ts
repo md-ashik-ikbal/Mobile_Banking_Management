@@ -19,7 +19,7 @@ export class TransactionEntity {
     transaction_amount: number;
 
     @Column()
-    trnsaction_time: Date;
+    transaction_time: Date;
 
     @ManyToOne(() => AccountEntity, (account) => account.user_id)
     account: AccountEntity;

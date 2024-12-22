@@ -14,6 +14,7 @@ import { PaymentEntity } from './entities/payment.entity';
 import { MerchantEntity } from './entities/merchant.entity';
 import { MailService } from './mail/mail.service';
 import { OtpEntity } from './entities/otp.entity';
+import { AgentEntity } from './entities/agent.entity';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { OtpEntity } from './entities/otp.entity';
       SessionEntity,
       PaymentEntity,
       MerchantEntity,
+      AgentEntity,
       OtpEntity
     ]),
     JwtModule
