@@ -10,6 +10,8 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { TokenBlacklistService } from 'src/auth/token-blacklist/token-blacklist.service';
 import { SessionEntity } from 'src/auth/entities/auth.entity';
+import { PaymentEntity } from './entities/payment.entity';
+import { MerchantEntity } from './entities/merchant.entity';
 
 @Module({
   imports: [
@@ -18,7 +20,9 @@ import { SessionEntity } from 'src/auth/entities/auth.entity';
       CustomerEntity,
       AccountEntity,
       TransactionEntity,
-      SessionEntity
+      SessionEntity,
+      PaymentEntity,
+      MerchantEntity
     ]),
     JwtModule
   ],

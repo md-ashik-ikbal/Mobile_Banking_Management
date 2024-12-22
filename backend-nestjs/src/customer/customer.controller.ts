@@ -4,6 +4,8 @@ import { CreatePersonalAccountDto, SignupDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SendMoneyDto } from './dto/send-money.dto';
+import { MakePaymentDto } from './dto/make-payment.dto';
+import { CahsOutDto } from './dto/cash-out.dto';
 
 @Controller('customer')
 export class CustomerController {
@@ -34,5 +36,17 @@ export class CustomerController {
   @UseGuards(AuthGuard)
   async Send_Money(@Request() request, @Body() sendMoneyDto: SendMoneyDto) {
     return await this.customerService.Send_Money(request.user.sub, sendMoneyDto);
+  }
+
+  @Post("/make_payment")
+  @UseGuards(AuthGuard)
+  async Make_Payment(@Request() request, @Body() makePaymentDto: MakePaymentDto) {
+    return await this.customerService.Make_Payment(request.user.sub, makePaymentDto);
+  }
+
+  @Post("/cash_out")
+  @UseGuards(AuthGuard)
+  async Cash_Out(@Request() request, @Body() cahsOutDto: CahsOutDto) {
+    return await this.customerService.Cash_Out(request.user.sub);
   }
 }

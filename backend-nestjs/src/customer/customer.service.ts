@@ -12,6 +12,9 @@ import { AccountType } from './constraints/account-type.constraint';
 import { SendMoneyDto } from './dto/send-money.dto';
 import { TransactionEntity } from './entities/transaction.entity';
 import { TransactionType } from './constraints/transaction-type.contraint';
+import { MakePaymentDto } from './dto/make-payment.dto';
+import { PaymentEntity } from './entities/payment.entity';
+import { MerchantEntity } from './entities/merchant.entity';
 
 @Injectable()
 export class CustomerService {
@@ -26,7 +29,13 @@ export class CustomerService {
     private readonly account_repo: Repository<AccountEntity>,
 
     @InjectRepository(TransactionEntity)
-    private readonly trnsaction_repo: Repository<TransactionEntity>
+    private readonly trnsaction_repo: Repository<TransactionEntity>,
+
+    @InjectRepository(PaymentEntity)
+    private readonly payment_repo: Repository<PaymentEntity>,
+
+    @InjectRepository(MerchantEntity)
+    private readonly merchant_repo: Repository<MerchantEntity>
   ) {}
 
   async Signup(signupDto: SignupDto): Promise<{ message: string }> {
@@ -198,7 +207,7 @@ export class CustomerService {
       new_transaction.sender_phone = (await this.user_repo.findOneBy({ user_id: sender_data.user_id })).user_phone;
       new_transaction.receiver_phone = receiver_data.user_phone;
       new_transaction.transaction_amount = sendMoneyDto.transaction_amount;
-      new_transaction.transaction_type = TransactionType.Send_Money;
+      new_transaction.transaction_type = TransactionType.Payment;
       new_transaction.transaction_amount = sendMoneyDto.transaction_amount;
       new_transaction.trnsaction_time = new Date();
       new_transaction.account = sender_data.account;
@@ -209,14 +218,56 @@ export class CustomerService {
     }
   }
 
+  async Make_Payment(id: number, makePaymentDto: MakePaymentDto) {
+    const user_data = await this.user_data(id);
+    const payment_data = await this.payment_repo.findOne({
+      where: [
+        { payment_token: makePaymentDto.payment_token }
+      ]
+    });
+
+    if (!payment_data) {
+      throw new NotFoundException("Payment data not found");
+    }
+
+    if (payment_data.payment_status != "pending") {
+      throw new HttpException("Payment has already been made", HttpStatus.CONFLICT)
+    }
+
+    const merchant_data = await this.user_data(payment_data.payment_to);
+
+    if (user_data.in_customer_repo.account.account_balance < payment_data.payment_amount) {
+      throw new HttpException("Insufficient fund", HttpStatus.BAD_REQUEST)
+    }
+
+    const user_new_balance = user_data.in_customer_repo.account.account_balance - payment_data.payment_amount;
+    const merchant_new_balance = merchant_data.in_customer_repo.account.account_balance + payment_data.payment_amount;
+
+    await this.account_repo.update({ user_id: id }, { account_balance: user_new_balance });
+    await this. account_repo.update( { user_id: payment_data.payment_to }, { account_balance: merchant_new_balance } );
+    await this.payment_repo.update({ payment_token: payment_data.payment_token }, { payment_status: "paid" });
+
+    var new_transaction: TransactionEntity = new TransactionEntity();
+
+    new_transaction.sender_phone = user_data.in_user_repo.user_phone;
+    new_transaction.receiver_phone = merchant_data.in_user_repo.user_phone;
+    new_transaction.transaction_type = TransactionType.Send_Money;
+    new_transaction.transaction_amount = payment_data.payment_amount;
+    new_transaction.trnsaction_time = new Date();
+    new_transaction.account = user_data.in_customer_repo.account;
+    await this.trnsaction_repo.save(new_transaction);
+
+    throw new HttpException("Payment success", HttpStatus.OK)
+  }
+
   async charge_calculate(amount: number) {
   }
 
-  async Payment(id: number) {
-
-  }
-
   async Cash_Out(id: number) {
+    const user_data = await this.user_data(id);
 
+    if (!user_data.in_user_repo) {
+      throw new NotFoundException("User not found");
+    }
   }
 }
