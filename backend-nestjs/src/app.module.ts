@@ -29,7 +29,7 @@ import { AuthModule } from './auth/auth.module';
       inject: [ConfigService],
     }),
     CustomerModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
