@@ -36,6 +36,24 @@ export class AuthService {
     );
   }
 
+  async Validate_Phone(phone: string) {
+    const user = await this.user_repo.findOneBy({ user_phone: phone });
+
+    try {
+      if (!user) {
+        throw new HttpException('Phone is not recognized!', HttpStatus.NOT_FOUND);
+      }
+    } catch(error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException('Login failed', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return {user_name: user.user_name};
+  }
+
   async Login(loginDto: LoginDto) {
     const { phone, password } = loginDto;
 

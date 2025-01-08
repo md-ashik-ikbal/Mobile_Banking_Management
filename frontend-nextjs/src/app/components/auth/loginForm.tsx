@@ -1,9 +1,14 @@
 "use client"
 
+import useAuth from "@/app/hooks/auth/useAuth";
+import useProfile from "@/app/hooks/user/useProfile";
+import API_ENDPOINTS from "@/app/routes/api";
 import Routes from "@/app/routes/route";
 import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Input, Link as UiLink } from "@nextui-org/react";
-import { AnimatePresence, motion } from "motion/react";
+import axios from "axios";
+import { AnimatePresence, motion, Variants } from "motion/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -14,53 +19,109 @@ type LoginData = {
 
 const LoginForm = () => {
     const { handleSubmit, register, formState: { errors }, watch, setError } = useForm<LoginData>();
-
     const loginData = watch();
-
     const [showPasswordField, setShowPasswordField] = useState(false);
+    const Router = useRouter();
+
+    const check_phone = async (phone: string) => {
+        try {
+            const phone_vlidation = await axios.post(API_ENDPOINTS.Validate_Phone, { phone: phone });
+
+            if (phone_vlidation.status === 201) {
+                setShowPasswordField(true);
+
+                return true;
+            } else {
+                setError('phone', {
+                    type: 'manual',
+                    message: "Phone is not recognized!"
+                });
+
+                return false;
+            }
+
+        } catch (error: any) {
+            if (error.response) {
+                setError('phone', {
+                    type: 'manual',
+                    message: error.response.data.message
+                });
+            } else {
+                setError('phone', {
+                    type: 'manual',
+                    message: 'Network error. Please try again later.'
+                });
+            }
+
+            return false;
+        }
+    }
 
     const Submit = async (data: LoginData) => {
-        if (data.phone != "111") {
-            setError('phone', {
-                type: 'manual',
-                message: "Phone is not recognize!"
-            });
-        } else {
-            setShowPasswordField(true);
+        try {
+            if(await check_phone(data.phone) && data.password != null) {
+                const token = await useAuth(data.phone, data.password);
+
+                if (!token) {
+                    setError('password', {
+                        type: 'manual',
+                        message: "Password did not match!"
+                    });
+                } else {
+                    Router.push(Routes.Dashboard);
+                }
+            }
+        } catch (error: any) {
+            if (error.response) {
+                setError('password', {
+                    type: 'manual',
+                    message: error.response.data.message
+                });
+            } else {
+                setError('password', {
+                    type: 'manual',
+                    message: 'Network error. Please try again later.'
+                });
+            }
+
+            return false;
+        }
+    }
+
+    const variants: Variants = {
+        initial: {
+            opacity: 0,
+            position: "absolute",
+        },
+        animate: {
+            opacity: 1,
+            position: "relative",
+            transition: {
+                duration: 1,
+            }
+        },
+        exit: {
+            opacity: 0,
+            position: "absolute",
+            transition: {
+                duration: 1,
+            }
         }
     }
 
     return (
         <>
             <div className="flex items-center justify-center min-h-[calc(100vh)]">
-                <div className="w-[300px] text-center">
+                <div className="min-w-[300px] text-center">
                     <form action="" onSubmit={handleSubmit(Submit)}>
-
                         <AnimatePresence>
                             <motion.span
                                 key={"1"}
-                                initial={{
-                                    opacity: 0,
-                                    position: "absolute",
-                                }}
-                                animate={{
-                                    opacity: 1,
-                                    position: "relative",
-                                    transition: { duration: 1 }
-                                }}
-                                exit={{
-                                    opacity: 0,
-                                    position: "absolute",
-                                    transition: { duration: 1 }
-                                }}
-                                style={{
-                                    background: 'linear-gradient(45deg, #ff6ec7, #ffcd02)',
-                                    backgroundClip: 'text',
-                                    WebkitBackgroundClip: 'text', // For Safari support
-                                    color: 'transparent',
-                                    fontWeight: 'bold',
-                                    fontSize: '30px',
-                                }}
+                                className="bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent font-bold text-2xl"
+                                initial={"initial"}
+                                animate={"animate"}
+                                exit={"exit"}
+                                variants={variants}
                             >
                                 {showPasswordField ? `${loginData.phone}` : "Log In With Phone"}
                             </motion.span>
@@ -68,22 +129,10 @@ const LoginForm = () => {
                                 <motion.div
                                     key={"2"}
                                     className="w-[300px]"
-                                    initial={{
-                                        opacity: 0,
-                                        position: "absolute",
-                                    }}
-                                    animate={{
-                                        opacity: 1,
-                                        position: "relative",
-                                        // y: 0,
-                                        transition: { duration: 1 }
-                                    }}
-                                    exit={{
-                                        opacity: 0,
-                                        // y: 30,
-                                        position: "absolute",
-                                        transition: { duration: 1 }
-                                    }}
+                                    initial={"initial"}
+                                    animate={"animate"}
+                                    exit={"exit"}
+                                    variants={variants}
                                 >
                                     <Input
                                         isClearable
@@ -106,23 +155,10 @@ const LoginForm = () => {
                                 <motion.div
                                     key={"3"}
                                     className="w-[300px]"
-                                    initial={{
-                                        opacity: 0,
-                                        position: "absolute",
-                                        // y: 30
-                                    }}
-                                    animate={{
-                                        opacity: 1,
-                                        position: "relative",
-                                        // y: 0,
-                                        transition: { duration: 1 }
-                                    }}
-                                    exit={{
-                                        opacity: 0,
-                                        // y: -30,
-                                        position: "absolute",
-                                        transition: { duration: 1 }
-                                    }}
+                                    initial={"initial"}
+                                    animate={"animate"}
+                                    exit={"exit"}
+                                    variants={variants}
                                 >
                                     <Input
                                         isClearable

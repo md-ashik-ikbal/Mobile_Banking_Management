@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Request, HttpException, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, HttpException, HttpStatus, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/create-auth.dto';
 import { AuthGuard } from './auth.guard';
@@ -8,6 +8,11 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService
   ) { }
+
+  @Post("/validate_phone")
+  async Validate_Phone(@Body() loginDto: Partial<LoginDto>) {
+    return await this.authService.Validate_Phone(loginDto.phone);
+  }
 
   @Post("/login")
   async Login(@Body() loginDto: LoginDto) {
