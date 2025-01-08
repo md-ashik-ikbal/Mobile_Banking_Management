@@ -1,6 +1,6 @@
 const Routes = {
     Home: "/pages/home",
-    Login: "/pages/auth/login",
+    Login: "/pages/auth",
 }
 
 export default Routes;

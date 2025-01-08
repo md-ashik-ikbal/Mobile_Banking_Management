@@ -1,16 +1,22 @@
 "use client"
 
-import { Button, Input } from "@nextui-org/react";
+import Routes from "@/app/routes/route";
+import { Button } from "@nextui-org/react";
+import Link from "next/link";
 
 const Home = () => {
     return (
         <>
-            <div className="w-screen h-screen">
-                <div className="w-56">
-                    <Input label="Email" type="text" size="sm" />
-                </div>
-                <Button color="success" variant="bordered" size="lg">Login</Button>
-
+            <div className="">
+                <h1>Welcome to home</h1>
+                <Button
+                    as={Link}
+                    href={Routes.Login}
+                    radius="sm"
+                    color="primary"
+                >
+                    Log in
+                </Button>
             </div>
         </>
     );
