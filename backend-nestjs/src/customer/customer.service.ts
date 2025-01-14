@@ -1,11 +1,9 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePersonalAccountDto, SignupDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
 import * as bcrypt from 'bcrypt'
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { And, EntityManager, MoreThan, Repository } from 'typeorm';
-import { CreateAccontDto } from './dto/create-account.dto';
+import { EntityManager, MoreThan, Repository } from 'typeorm';
 import { AccountEntity } from './entities/account.entity';
 import { CustomerEntity } from './entities/customer.entity';
 import { AccountType } from './constraints/account-type.constraint';
@@ -138,7 +136,6 @@ export class CustomerService {
         { user_phone: phone !== "-1" ? phone : undefined },
         { user_email: email !== "" ? email : undefined }
       ],
-      // select: ["user_id", "user_name", "user_phone", "user_email", "user_role"]
     });
 
     const in_customer_repo = await this.customer_repo.findOne({
@@ -260,7 +257,6 @@ export class CustomerService {
 
     });
 
-    // throw new HttpException("Payment success", HttpStatus.OK);
     return {
       message: "Payment success",
       payment_token: payment_data.payment_token,

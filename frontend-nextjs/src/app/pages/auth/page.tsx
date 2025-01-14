@@ -1,26 +1,14 @@
-"use client"
+import LoginComponent from "@/app/components/auth/loginComponent";
+import { Metadata } from "next";
 
-import LoginSkeleton from "@/app/components/skeletons/loginSkeleton";
-import dynamic from "next/dynamic";
+export const metadata: Metadata = {
+    title: "Log In",
+};
 
 const Login = () => {
-    const LoginForm = dynamic(async () => {
-        return await import("@/app/components/auth/loginForm");
-    }, {
-        ssr: false,
-        loading: () => {
-            return (
-                <>
-                    <LoginSkeleton />
-                </>
-            );
-        }
-    }
-    );
-    
     return (
         <>
-           <LoginForm />
+           <LoginComponent />
         </>
     );
 }

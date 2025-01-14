@@ -78,7 +78,7 @@ export class AuthService {
       });
 
       if (get_valid_token) {
-        return get_valid_token;
+        return { jwt_token: get_valid_token.jwt_token }
       }
 
       var new_session: SessionEntity = new SessionEntity();
@@ -94,10 +94,7 @@ export class AuthService {
       const { user_password, ...userWithoutPassword } = new_session.user;
 
       // Return the session with the user data excluding the password
-      return {
-        ...new_session,
-        user: userWithoutPassword,
-      }
+      return { jwt_token: new_session.jwt_token }
 
     } catch (error) {
       if (error instanceof HttpException) {

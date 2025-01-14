@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CreatePersonalAccountDto, SignupDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SendMoneyDto } from './dto/send-money.dto';
 import { MakePaymentDto } from './dto/make-payment.dto';

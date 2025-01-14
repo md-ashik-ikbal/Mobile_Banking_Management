@@ -8,6 +8,7 @@ const API_ENDPOINTS = {
     // Auth
     Validate_Phone: Default_URL + "auth/validate_phone",
     Login: Default_URL + "auth/login",
+    Cookies: Default_URL + "auth/get_cookies",
     Logout: Default_URL + "auth/logout",
 
     // Password

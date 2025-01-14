@@ -1,7 +1,15 @@
+import DashboardComponent from "@/app/components/dashboard/dashboardComponent";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Dashboard",
+};
+
 const Dashboard = () => {
+
     return(
         <>
-            <h1>dashboard</h1>
+            <DashboardComponent />
         </>
     );
 }

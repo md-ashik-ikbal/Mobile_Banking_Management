@@ -6,7 +6,6 @@ import { UserEntity } from './entities/user.entity';
 import { CustomerEntity } from './entities/customer.entity';
 import { AccountEntity } from './entities/account.entity';
 import { TransactionEntity } from './entities/transaction.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { TokenBlacklistService } from 'src/auth/token-blacklist/token-blacklist.service';
 import { SessionEntity } from 'src/auth/entities/auth.entity';
